@@ -8,6 +8,15 @@ trigger:
 resources:
 - repo: self
 
+parameters:
+- name: environment
+  displayName: 'Select Environment'
+  type: string
+  default: 'apibase.production'
+  values:
+  - 'apibase.production'
+  - 'apibase.development'
+
 variables:
 
   # Container registry service connection established during pipeline creation
