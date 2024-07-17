@@ -1,0 +1,19 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: apibase 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apibase
+  template:
+    metadata:
+      labels:
+        app: apibase 
+    spec:
+      containers:
+        - name: apibase 
+          image: acrprueba.azurecr.io/apibase
+          ports:
+          - containerPort: 3000
