@@ -13,7 +13,7 @@ variables:
   dockerRegistryServiceConnection: '5f9b0eb2-ec46-4bb9-8305-a8e3684eb201'
   imageRepository: 'apibase'
   containerRegistry: 'aksprueba.azurecr.io'
-  dockerfilePath: '.'
+  dockerfilePath: '**/Dockerfile'
   tag: '$(Build.BuildId)'
 
   # Agent VM image name
