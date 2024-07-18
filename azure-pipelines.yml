@@ -12,10 +12,10 @@ parameters:
 - name: environment
   displayName: 'Select Environment'
   type: string
-  default: 'apibase'
+  default: 'apibase.production'
   values:
-  - 'apibase'
-  - 'apibase-dev'
+  - 'apibase.production'
+  - 'apibase.development'
 
 variables:
 
