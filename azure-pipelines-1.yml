@@ -72,9 +72,10 @@ stages:
       displayName: 'Push Docker image'
 
     - script: |
+        echo "##[group]Save Docker layers to local tar file"
         mkdir -p /tmp/docker
-        docker builder prune --force --filter until=24h
-        docker save $(containerRegistry)/$(imageRepository):$(tag) | tar -C /tmp/docker -cvf /tmp/docker/$(tag).tar -
+        docker save $(containerRegistry)/$(imageRepository):$(tag) -o /tmp/docker/$(tag).tar
+        echo "##[endgroup]"
       displayName: 'Save Docker layers to local tar file'
       condition: succeeded()
 
