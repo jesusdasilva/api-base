@@ -54,7 +54,7 @@ stages:
     - task: Cache@2
       inputs:
         key: 'docker | $(Agent.OS) | Dockerfile'
-        path: '/tmp/docker'
+        path: /tmp/docker
         restoreKeys: |
           docker | $(Agent.OS)
         cacheHitVar: 'DOCKER_CACHE_HIT'
@@ -74,11 +74,12 @@ stages:
     - script: |
         mkdir -p /tmp/docker
         docker builder prune --force --filter until=24h
-        docker save $(containerRegistry)/$(imageRepository):$(tag) | tar -C /tmp/docker -cvf $(tag).tar -
+        docker save $(containerRegistry)/$(imageRepository):$(tag) | tar -C /tmp/docker -cvf /tmp/docker/$(tag).tar -
       displayName: 'Save Docker layers to local tar file'
+      condition: succeeded()
 
     - task: PublishPipelineArtifact@1
       inputs:
-        targetPath: '/tmp/docker'
+        targetPath: /tmp/docker
         artifact: 'docker-cache'
         publishLocation: 'pipeline'
