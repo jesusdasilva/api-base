@@ -60,16 +60,15 @@ stages:
         cacheHitVar: 'DOCKER_CACHE_HIT'
 
     - script: |
-        echo "##[group]Build and Push Docker Image"
-        docker build \
-          --cache-from=type=local,src=/tmp/docker \
-          --tag $(containerRegistry)/$(imageRepository):$(tag) \
-          --file $(dockerfilePath) .
+        echo "##[group]Build Docker Image"
+        docker build --cache-from=type=local,src=/tmp/docker --tag $(containerRegistry)/$(imageRepository):$(tag) --file $(dockerfilePath) .
         echo "##[endgroup]"
       displayName: 'Build Docker image'
 
     - script: |
+        echo "##[group]Push Docker Image"
         docker push $(containerRegistry)/$(imageRepository):$(tag)
+        echo "##[endgroup]"
       displayName: 'Push Docker image'
 
     - script: |
