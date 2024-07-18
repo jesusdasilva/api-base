@@ -62,18 +62,38 @@ stages:
     pool:
       vmImage: $(vmImageName)
     steps:
-    - task: Docker@2
-      displayName: Build and push an image to container registry
+    - task: Cache@2
       inputs:
-        command: buildAndPush
-        repository: $(imageRepository)
-        dockerfile: $(dockerfilePath)
-        containerRegistry: $(dockerRegistryServiceConnection)
-        tags: |
-          $(tag)
+        key: 'docker | $(Agent.OS) | Dockerfile'
+        path: '/tmp/docker'
+        restoreKeys: |
+          docker | $(Agent.OS)
+        cacheHitVar: 'DOCKER_CACHE_HIT'
 
-    - upload: manifests
-      artifact: manifests
+    - script: |
+        echo "##[group]Build and Push Docker Image"
+        docker build \
+          --cache-from=type=local,src=/tmp/docker \
+          --tag $(containerRegistry)/$(imageRepository):$(tag) \
+          --file $(dockerfilePath) .
+        echo "##[endgroup]"
+      displayName: 'Build Docker image'
+
+    - script: |
+        docker push $(containerRegistry)/$(imageRepository):$(tag)
+      displayName: 'Push Docker image'
+
+    - script: |
+        mkdir -p /tmp/docker
+        docker builder prune --force --filter until=24h
+        docker save $(containerRegistry)/$(imageRepository):$(tag) | tar -C /tmp/docker -cvf $(tag).tar -
+      displayName: 'Save Docker layers to local tar file'
+
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: '/tmp/docker'
+        artifact: 'docker-cache'
+        publishLocation: 'pipeline'
 
 - stage: Deploy
   displayName: Deploy stage
@@ -89,6 +109,11 @@ stages:
       runOnce:
         deploy:
           steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifactName: 'docker-cache'
+              targetPath: '/tmp/docker'
+
           - task: KubernetesManifest@0
             displayName: Create imagePullSecret
             inputs:
